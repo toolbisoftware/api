@@ -1,0 +1,30 @@
+name: 📗 Documentation Issue
+description: Report an issue with the documentation.
+labels: ["Category: Documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a documentation issue. It helps make the project better.
+  - type: dropdown
+    attributes:
+      label: What is the type of issue?
+      multiple: true
+      options:
+        - Documentation is missing
+        - Documentation is incorrect
+        - Documentation is confusing
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What is the issue?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Where did you find it?
+      description: If possible, please provide the URL(s) where you found this issue.
+    validations:
+      required: true

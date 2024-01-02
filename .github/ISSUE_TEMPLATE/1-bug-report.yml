@@ -1,0 +1,49 @@
+name: 🐛 Bug Report
+description: Report an issue that should be fixed.
+labels: ["Type: Bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for submitting a bug report. It helps make the project better.
+
+        If you need help or support using **API**, and are not reporting a bug, please join our [Discord](https://toolbi.xyz/discord) server.
+
+        Make sure you are running the latest version of **API**.
+        The bug you are experiencing may already have been fixed.
+
+        Please try to include as much information as possible.
+  - type: input
+    attributes:
+      label: What version of **API** is running?
+      description: The version can be found in the `package.json` file.
+  - type: input
+    attributes:
+      label: What platform is running?
+      description: |
+        For Windows: copy the output of `"$([Environment]::OSVersion | ForEach-Object VersionString) $(if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" })"` in the PowerShell console.
+        For Linux and MacOS: copy the output of `uname -mprs`.
+  - type: textarea
+    attributes:
+      label: What steps can reproduce the bug?
+      description: Explain the bug.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What is the expected behaviour?
+      description: If possible, please provide text instead of only images and videos.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What do you see instead?
+      description: If possible, please provide text instead of only images and videos.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Is there something else you think we should know?
+    validations:
+      required: true
