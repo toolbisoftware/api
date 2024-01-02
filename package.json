@@ -27,5 +27,8 @@
     "nodemon": "latest",
     "ts-node": "latest",
     "typescript": "latest"
+  },
+  "dependencies": {
+    "commonlib-js": "^1.0.0-beta.4"
   }
 }
