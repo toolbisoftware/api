@@ -65,4 +65,4 @@ export const KEYSTORE_PASSWORD = "";
  * @example
  * 0
  */
-export const KEYSTORE_DATABASE = "";
+export const KEYSTORE_DATABASE = -1;
