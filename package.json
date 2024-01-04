@@ -8,7 +8,7 @@
   },
   "main": "build/index.js",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon -dev",
     "build": "npx tsc",
     "start": "node build/index.js"
   },
