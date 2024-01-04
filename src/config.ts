@@ -37,7 +37,12 @@ const production: ConfigMode = {
   keystoreDatabase: productionSecrets.KEYSTORE_DATABASE
 };
 
-const shared: ConfigShared = {};
+const shared: ConfigShared = {
+  databaseConnectionAttempts: 10,
+  databaseConnectionAttemptWait: 5000,
+  keystoreConnectionAttempts: 10,
+  keystoreConnectionAttemptWait: 5000
+};
 
 export default {
   development,
