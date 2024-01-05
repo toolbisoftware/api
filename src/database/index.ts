@@ -160,13 +160,15 @@ export default class Database {
       if (!maxAttempts) {
         const message =
           "The parameter 'maxAttempts' must be of type 'number' on the initial connection.";
-        this.#api.logger.log("error", message);
+        this.#api.logger.log("error", message, {
+          category: "database"
+        });
         throw new Error(message);
       }
 
       for (let attempt = 0; attempt <= maxAttempts; attempt++) {
         if (await run(attempt)) {
-          return;
+          break;
         }
       }
 
@@ -174,7 +176,7 @@ export default class Database {
     } else {
       while (true) {
         if (await run()) {
-          return;
+          break;
         }
       }
     }
