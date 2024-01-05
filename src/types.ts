@@ -6,7 +6,7 @@ import express from "express";
 import API from "./api/index.js";
 import { Route } from "./routes/index_.js";
 
-export type LoggerLogCategories = "api" | "router";
+export type LoggerLogCategories = "api" | "router" | "request";
 
 //
 //
