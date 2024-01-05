@@ -4,6 +4,7 @@
 import { Logger, stopwatch } from "commonlib-js";
 import config from "../config.js";
 import Database from "../database/index.js";
+import Keystore from "../keystore/index.js";
 import type {
   Config,
   ConfigMode,
@@ -21,6 +22,7 @@ export default class API {
   };
   readonly config: Config;
   readonly database: Database;
+  readonly keystore: Keystore;
   readonly server: Server;
 
   constructor() {
@@ -42,6 +44,7 @@ export default class API {
       config: config[currentMode]
     };
     this.database = new Database(this);
+    this.keystore = new Keystore(this);
     this.server = new Server(this);
 
     this.logger.log("info", "Initialized.", {
@@ -56,6 +59,7 @@ export default class API {
     this.logger.log("info", "Starting.", { category: "api" });
 
     await this.database.connect();
+    await this.keystore.connect();
     await this.server.init();
 
     this.logger.log("done", "Started.", {
