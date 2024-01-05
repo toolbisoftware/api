@@ -3,6 +3,7 @@
 
 import { Logger, stopwatch } from "commonlib-js";
 import config from "../config.js";
+import Database from "../database/index.js";
 import type {
   Config,
   ConfigMode,
@@ -19,6 +20,7 @@ export default class API {
     config: ConfigMode;
   };
   readonly config: Config;
+  readonly database: Database;
   readonly server: Server;
 
   constructor() {
@@ -39,6 +41,7 @@ export default class API {
       current: currentMode,
       config: config[currentMode]
     };
+    this.database = new Database(this);
     this.server = new Server(this);
 
     this.logger.log("info", "Initialized.", {
@@ -52,6 +55,7 @@ export default class API {
 
     this.logger.log("info", "Starting.", { category: "api" });
 
+    await this.database.connect();
     await this.server.init();
 
     this.logger.log("done", "Started.", {
