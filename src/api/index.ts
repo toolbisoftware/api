@@ -31,7 +31,8 @@ export default class API {
     this.logger = new Logger<LoggerLogCategories>({
       categories: [
         { name: "api", text: "API" },
-        { name: "router", text: "ROUTER" }
+        { name: "router", text: "ROUTER" },
+        { name: "request", text: "REQUEST" }
       ]
     });
     this.logger.log("info", "Initializing.", { category: "api" });
