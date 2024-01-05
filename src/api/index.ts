@@ -32,7 +32,8 @@ export default class API {
       categories: [
         { name: "api", text: "API" },
         { name: "router", text: "ROUTER" },
-        { name: "request", text: "REQUEST" }
+        { name: "request", text: "REQUEST" },
+        { name: "server", text: "SERVER" }
       ]
     });
     this.logger.log("info", "Initializing.", { category: "api" });
