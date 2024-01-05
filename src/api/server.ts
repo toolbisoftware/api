@@ -3,6 +3,8 @@
 
 import express from "express";
 import helmet from "helmet";
+import { checkRoute } from "../middleware/checkRoute.js";
+import { errorHandler } from "../middleware/errorHandler.js";
 import Router from "../utils/router.js";
 import API from "./index.js";
 
@@ -28,7 +30,17 @@ export default class Server {
     this.client.use(express.json());
     this.client.use(express.urlencoded({ extended: true }));
     this.client.use(helmet());
+    this.client.use(checkRoute(this.#api));
     this.client.use("/", await this.createRouter());
+    this.client.use(errorHandler(this.#api));
     this.client.listen(this.#api.mode.config.port, "0.0.0.0");
+
+    this.#api.logger.log(
+      "info",
+      `Listening on port '${this.#api.mode.config.port}'.`,
+      {
+        category: "server"
+      }
+    );
   }
 }
