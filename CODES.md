@@ -2,6 +2,7 @@
 
 - **1xxxxx**: Information
   - **10xxxx**: Special
+    - `100000`: `welcome` | `Welcome to the Toolbi API.`
   - **11xxxx**: Generic
   - **12xxxx**: Server
   - **13xxxx**: Request
@@ -13,6 +14,8 @@
     - `230000`: `error` | `An error occurred while trying to process the request.`
     - `230001`: `endpoint_not_found` | `Endpoint not found.`
     - `230002`: `endpoint_method_not_found` | `Method not found for the current endpoint.`
+    - `230003`: `invalid_ip_address` | `The IP address of the request is not valid.`
+    - `230004`: `ratelimit` | `Too many requests.`
 - **3xxxxx**: Success
   - **30xxxx**: Special
   - **31xxxx**: Generic
