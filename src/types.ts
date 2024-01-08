@@ -27,6 +27,19 @@ export type HttpMethods =
 
 export type Modes = "development" | "production";
 
+export interface ConfigRatelimitGroup {
+  ip: {
+    enabled: boolean;
+    timeframe: number | string;
+    requests: number;
+  };
+  account: {
+    enabled: boolean;
+    timeframe: number | string;
+    requests: number;
+  };
+}
+
 export interface ConfigMode {
   host: string;
   port: number;
@@ -41,6 +54,9 @@ export interface ConfigMode {
   keystoreUser: string;
   keystorePassword: string;
   keystoreDatabase: number;
+  ratelimitGroups: {
+    [K in RatelimitGroups as K]: ConfigRatelimitGroup;
+  };
 }
 
 export interface ConfigShared {
@@ -74,10 +90,61 @@ export type RouterRoute = {
   priority: number;
 };
 
+export interface RouteRatelimitGroup {
+  enabled: boolean;
+  name: RatelimitGroups;
+  use: boolean;
+  add: boolean;
+}
+
+export interface RouteOptionsRatelimit {
+  enabled: boolean;
+  ip: {
+    local: {
+      enabled: boolean;
+      timeframe: number | string;
+      requests: number;
+    };
+    groups: RouteRatelimitGroup[];
+  };
+  account: {
+    local: {
+      enabled: boolean;
+      timeframe: number | string;
+      requests: number;
+    };
+    groups: RouteRatelimitGroup[];
+  };
+}
+
 export interface RouteOptions {
   enabled: boolean;
+  ratelimit: RouteOptionsRatelimit;
 }
 
 export interface RouteConstructor extends Route {
   new (api: API): Route;
+}
+
+//
+//
+
+export type RatelimitMethods = "ip" | "account";
+
+export type RatelimitGroups = "global";
+
+//
+//
+
+export interface Account {
+  id: number;
+}
+
+//
+//
+
+declare module "express-serve-static-core" {
+  interface Request {
+    account?: Account;
+  }
 }
