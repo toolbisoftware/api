@@ -32,10 +32,11 @@
     "typescript": "latest"
   },
   "dependencies": {
-    "commonlib-js": "^1.0.0-beta.4",
+    "commonlib-js": "^1.0.0-beta.6",
     "express-list-endpoints": "^6.0.0",
     "helmet": "^7.1.0",
     "ioredis": "^5.3.2",
+    "joi": "^17.11.0",
     "pg": "^8.11.3"
   }
 }
