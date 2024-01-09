@@ -18,7 +18,21 @@ const development: ConfigMode = {
   keystorePort: developmentSecrets.KEYSTORE_PORT || 6379,
   keystoreUser: developmentSecrets.KEYSTORE_USER || "default",
   keystorePassword: developmentSecrets.KEYSTORE_PASSWORD,
-  keystoreDatabase: developmentSecrets.KEYSTORE_DATABASE
+  keystoreDatabase: developmentSecrets.KEYSTORE_DATABASE,
+  ratelimitGroups: {
+    global: {
+      ip: {
+        enabled: true,
+        timeframe: "1m",
+        requests: 60
+      },
+      account: {
+        enabled: true,
+        timeframe: "1m",
+        requests: 30
+      }
+    }
+  }
 };
 
 const production: ConfigMode = {
@@ -34,7 +48,21 @@ const production: ConfigMode = {
   keystorePort: productionSecrets.KEYSTORE_PORT || 6379,
   keystoreUser: productionSecrets.KEYSTORE_USER || "default",
   keystorePassword: productionSecrets.KEYSTORE_PASSWORD,
-  keystoreDatabase: productionSecrets.KEYSTORE_DATABASE
+  keystoreDatabase: productionSecrets.KEYSTORE_DATABASE,
+  ratelimitGroups: {
+    global: {
+      ip: {
+        enabled: true,
+        timeframe: "1m",
+        requests: 60
+      },
+      account: {
+        enabled: true,
+        timeframe: "1m",
+        requests: 30
+      }
+    }
+  }
 };
 
 const shared: ConfigShared = {
