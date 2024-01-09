@@ -181,9 +181,11 @@ export default class Router {
         const routeMethod = method as RouteRequestMethods;
         const handlers = itemToArr(handler);
 
+        const useRatelimit = await this.#api.ratelimit.use(file);
+
         eRouter[routeMethod](
           path,
-          ...[...preHandlers, ...handlers, ...postHandlers]
+          ...[useRatelimit, ...preHandlers, ...handlers, ...postHandlers]
         );
       }
     }
