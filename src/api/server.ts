@@ -3,6 +3,7 @@
 
 import express from "express";
 import helmet from "helmet";
+import { checkIpAddress } from "../middleware/checkIpAddress.js";
 import { checkRoute } from "../middleware/checkRoute.js";
 import { errorHandler } from "../middleware/errorHandler.js";
 import Router from "../utils/router.js";
@@ -18,7 +19,9 @@ export default class Server {
   }
 
   private async createRouter(): Promise<express.Router> {
-    const preHandlers: express.Handler[] = [];
+    const useCheckIpAddress = checkIpAddress;
+
+    const preHandlers: express.Handler[] = [useCheckIpAddress];
     const postHandlers: express.Handler[] = [];
 
     const router = await new Router(this.#api).init(preHandlers, postHandlers);
