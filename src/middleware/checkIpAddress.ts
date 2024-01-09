@@ -6,7 +6,8 @@ import express from "express";
 
 export const checkIpAddress = (
   req: express.Request,
-  res: express.Response
+  res: express.Response,
+  next: express.NextFunction
 ): void => {
   if (!req.ip) {
     return sar(res, 400, {
@@ -15,4 +16,6 @@ export const checkIpAddress = (
       message: "The IP address of the request is not valid."
     });
   }
+
+  return next();
 };
