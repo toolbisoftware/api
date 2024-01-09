@@ -208,5 +208,7 @@ export default class Database {
       true,
       this.#api.config.shared.databaseConnectionAttempts
     );
+
+    await this.#api.account.createTables();
   }
 }
