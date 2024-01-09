@@ -91,7 +91,6 @@ export type RouterRoute = {
 };
 
 export interface RouteRatelimitGroup {
-  enabled: boolean;
   name: RatelimitGroups;
   use: boolean;
   add: boolean;
