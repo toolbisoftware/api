@@ -184,7 +184,11 @@ export default class Keystore {
         run();
       }, 5000);
     } catch (err) {
-      console.log(err);
+      const error = err instanceof Error ? err : undefined;
+      this.#api.logger.log("error", error?.message || "Unknown error", {
+        category: "keystore",
+        error: error?.stack
+      });
     }
   }
 
