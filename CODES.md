@@ -16,6 +16,7 @@
     - `230002`: `endpoint_method_not_found` | `Method not found for the current endpoint.`
     - `230003`: `invalid_ip_address` | `The IP address of the request is not valid.`
     - `230004`: `ratelimit` | `Too many requests.`
+    - `230005`: `cooldown` | `Too many requests.`
 - **3xxxxx**: Success
   - **30xxxx**: Special
   - **31xxxx**: Generic
