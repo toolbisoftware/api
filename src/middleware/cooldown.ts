@@ -249,6 +249,7 @@ export default class Cooldown {
         groupName: null as unknown as CooldownGroups
       };
 
+      // TODO Maybe map the groups and run them in parallel
       for (const group of routeFile.cooldown.groups) {
         const config = this.#api.mode.config.cooldownGroups[group.name];
         let data = await this.get(req.account.id, group.name);
