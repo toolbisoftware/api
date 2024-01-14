@@ -40,6 +40,12 @@ export interface ConfigRatelimitGroup {
   };
 }
 
+export interface ConfigCooldownGroup {
+  enabled: boolean;
+  timeframe: number | string;
+  requests: number;
+}
+
 export interface ConfigMode {
   host: string;
   port: number;
@@ -56,6 +62,10 @@ export interface ConfigMode {
   keystoreDatabase: number;
   ratelimitGroups: {
     [K in RatelimitGroups as K]: ConfigRatelimitGroup;
+  };
+  cooldownCacheLifespan: number;
+  cooldownGroups: {
+    [K in CooldownGroups as K]: ConfigCooldownGroup;
   };
 }
 
