@@ -4,6 +4,8 @@
 import { stopwatch } from "commonlib-js";
 import pg from "pg";
 import API from "../api/index.js";
+import Account from "./account.js";
+import Cooldown from "./cooldown.js";
 
 export default class Database {
   readonly #api: API;
@@ -12,6 +14,8 @@ export default class Database {
   ping: number;
   readonly #pool: pg.Pool;
   #client: pg.PoolClient | null;
+  readonly account: Account;
+  readonly cooldown: Cooldown;
 
   constructor(api: API) {
     this.#api = api;
@@ -35,6 +39,8 @@ export default class Database {
     this.ping = NaN;
     this.#pool = this.createPool();
     this.#client = null;
+    this.account = new Account(this.#api);
+    this.cooldown = new Cooldown(this.#api);
 
     this.updatePing();
   }
@@ -209,6 +215,7 @@ export default class Database {
       this.#api.config.shared.databaseConnectionAttempts
     );
 
-    await this.#api.account.createTables();
+    await this.#api.database.account.createTables();
+    await this.#api.database.cooldown.setupTables();
   }
 }
