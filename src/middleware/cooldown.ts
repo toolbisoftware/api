@@ -241,11 +241,11 @@ export default class Cooldown {
 
       const cooldown: {
         triggered: boolean;
-        expireDate: number;
+        expirationDate: number;
         groupName: CooldownGroups;
       } = {
         triggered: false,
-        expireDate: 0,
+        expirationDate: 0,
         groupName: null as unknown as CooldownGroups
       };
 
@@ -276,8 +276,8 @@ export default class Cooldown {
               const lifespan =
                 data.creationDate.getTime() + timeToMs(config.timeframe);
               cooldown.triggered = true;
-              if (lifespan > cooldown.expireDate) {
-                cooldown.expireDate = lifespan;
+              if (lifespan > cooldown.expirationDate) {
+                cooldown.expirationDate = lifespan;
                 cooldown.groupName = data.group;
               }
             } else {
@@ -315,7 +315,7 @@ export default class Cooldown {
           messageId: "cooldown",
           message: "Too many requests.",
           content: {
-            expireDate: cooldown.expireDate
+            expirationDate: cooldown.expirationDate
           }
         });
       }
