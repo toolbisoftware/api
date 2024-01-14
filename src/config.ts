@@ -32,6 +32,14 @@ const development: ConfigMode = {
         requests: 30
       }
     }
+  },
+  cooldownCacheLifespan: 900, // 15 min -> 900 sec
+  cooldownGroups: {
+    test: {
+      enabled: false,
+      timeframe: 0,
+      requests: 0
+    }
   }
 };
 
@@ -61,6 +69,14 @@ const production: ConfigMode = {
         timeframe: "1m",
         requests: 30
       }
+    }
+  },
+  cooldownCacheLifespan: 900, // 15 min -> 900 sec
+  cooldownGroups: {
+    test: {
+      enabled: false,
+      timeframe: 0,
+      requests: 0
     }
   }
 };
