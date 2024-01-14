@@ -126,9 +126,21 @@ export interface RouteOptionsRatelimit {
   };
 }
 
+export interface RouteCooldownGroup {
+  name: CooldownGroups;
+  use: boolean;
+  add: boolean;
+}
+
+export interface RouteOptionsCooldown {
+  enabled: boolean;
+  groups: RouteCooldownGroup[];
+}
+
 export interface RouteOptions {
   enabled: boolean;
   ratelimit: RouteOptionsRatelimit;
+  cooldown: RouteOptionsCooldown;
 }
 
 export interface RouteConstructor extends Route {
@@ -141,6 +153,20 @@ export interface RouteConstructor extends Route {
 export type RatelimitMethods = "ip" | "account";
 
 export type RatelimitGroups = "global";
+
+export interface RatelimitData {
+  requests: number;
+  expirationDate: number;
+}
+
+export type CooldownGroups = "test";
+
+export interface CooldownData {
+  accountId: number;
+  group: CooldownGroups;
+  requests: number;
+  creationDate: Date;
+}
 
 //
 //
