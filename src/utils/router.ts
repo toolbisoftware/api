@@ -182,10 +182,17 @@ export default class Router {
         const handlers = itemToArr(handler);
 
         const useRatelimit = await this.#api.ratelimit.use(file);
+        const useCooldown = await this.#api.cooldown.use(file);
 
         eRouter[routeMethod](
           path,
-          ...[useRatelimit, ...preHandlers, ...handlers, ...postHandlers]
+          ...[
+            useRatelimit,
+            useCooldown,
+            ...preHandlers,
+            ...handlers,
+            ...postHandlers
+          ]
         );
       }
     }
