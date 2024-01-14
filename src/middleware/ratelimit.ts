@@ -7,6 +7,8 @@ import API from "../api/index.js";
 import { Route } from "../routes/index_.js";
 import { RatelimitData, RatelimitMethods } from "../types.js";
 
+// TODO Handle errors and prevent the app from crashing or at least from showing the logs
+
 export default class Ratelimit {
   readonly #api: API;
 
