@@ -40,45 +40,6 @@ export default class Ratelimit {
     return null;
   }
 
-  private async run(
-    method: RatelimitMethods,
-    value: string | number,
-    group: string,
-    timeframe: number | string,
-    requests: number,
-    use: boolean,
-    add: boolean
-  ): Promise<
-    | {
-        group: string;
-        expirationDate: number;
-      }
-    | null
-    | Error
-  > {
-    const get = await this.get(method, value, group);
-
-    if (get) {
-      if (use) {
-        if (get.requests >= requests) {
-          return {
-            group,
-            expirationDate: get.expirationDate
-          };
-        }
-      }
-    }
-
-    if (add) {
-      const update = await this.update(method, value, group, timeframe, get);
-      if (update instanceof Error) {
-        return update;
-      }
-    }
-
-    return null;
-  }
-
   private async update(
     method: RatelimitMethods,
     value: string | number,
@@ -123,6 +84,45 @@ export default class Ratelimit {
 
       return data;
     }
+  }
+
+  private async run(
+    method: RatelimitMethods,
+    value: string | number,
+    group: string,
+    timeframe: number | string,
+    requests: number,
+    use: boolean,
+    add: boolean
+  ): Promise<
+    | {
+        group: string;
+        expirationDate: number;
+      }
+    | null
+    | Error
+  > {
+    const get = await this.get(method, value, group);
+
+    if (get) {
+      if (use) {
+        if (get.requests >= requests) {
+          return {
+            group,
+            expirationDate: get.expirationDate
+          };
+        }
+      }
+    }
+
+    if (add) {
+      const update = await this.update(method, value, group, timeframe, get);
+      if (update instanceof Error) {
+        return update;
+      }
+    }
+
+    return null;
   }
 
   async use(
