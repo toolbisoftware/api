@@ -201,51 +201,135 @@ export default class Cooldown {
     return cooldownData;
   }
 
-
+  private async reset(
+    method: CooldownMethods,
+    value: string | number,
+    group: CooldownGroups,
+    timeframe: number | string,
+    data: CooldownData
+  ): Promise<CooldownData | Error> {
+    if (Date.now() >= data.creationDate.getTime() + timeToMs(timeframe)) {
       const set = await this.set(
         true,
-        false,
-        accountId,
-        groupName,
-        data.requests + 1,
-        data.creationDate.getTime()
-      );
-      return set;
-    } else {
-      const set = await this.set(
-        false,
-        false,
-        accountId,
-        groupName,
+        true,
+        method,
+        value,
+        group,
         1,
         Date.now()
       );
+
       return set;
     }
+
+    return data;
   }
 
-  private async reset(
-    accountId: number,
-    groupName: CooldownGroups,
-    groupConfig: ConfigCooldownGroup,
-    data: CooldownData
-  ): Promise<[CooldownData | Error, boolean]> {
-    if (
-      Date.now() >=
-      data.creationDate.getTime() + timeToMs(groupConfig.timeframe)
-    ) {
-      const set = await this.set(
-        true,
-        true,
-        accountId,
-        groupName,
-        1,
-        Date.now()
-      );
-      return [set, true];
+  private async updater(
+    groups: {
+      method: CooldownMethods;
+      value: string | number;
+      group: CooldownGroups;
+    }[]
+  ): Promise<{
+    run: typeof run;
+  }> {
+    const run = async (
+      entries: { method: CooldownMethods; group: CooldownGroups }[]
+    ) => {
+      const usedGroups: typeof groups = [];
+      for (const group of entries) {
+        const get = groups.find(
+          (x) => group.method === x.method && group.group === x.group
+        );
+        if (get) {
+          usedGroups.push(get);
+        } else {
+          continue;
+        }
+      }
+
+      const mapRun = usedGroups.map(async (group) => {
+        const data = await this.get(group.method, group.value, group.group);
+        if (data) {
+          const set = await this.set(
+            true,
+            false,
+            group.method,
+            group.value,
+            group.group,
+            data.requests + 1,
+            data.creationDate.getTime()
+          );
+          if (set instanceof Error) {
+            throw set;
+          }
+
+          return set;
+        } else {
+          const set = await this.set(
+            false,
+            false,
+            group.method,
+            group.value,
+            group.group,
+            1,
+            Date.now()
+          );
+          if (set instanceof Error) {
+            throw set;
+          }
+
+          return set;
+        }
+      });
+
+      await Promise.all(mapRun);
+
+      return;
+    };
+
+    return {
+      run
+    };
+  }
+
+  private async run(
+    method: CooldownMethods,
+    value: string | number,
+    group: CooldownGroups,
+    timeframe: number | string,
+    requests: number,
+    enabled: boolean,
+    use: boolean
+  ): Promise<{ group: string; expirationDate: number } | null | Error> {
+    if (!enabled) {
+      return null;
     }
 
-    return [data, false];
+    let data = await this.get(method, value, group);
+
+    if (data) {
+      const reset = await this.reset(method, value, group, timeframe, data);
+      if (reset instanceof Error) {
+        return reset;
+      }
+
+      data = reset;
+
+      if (use) {
+        if (data.requests > requests) {
+          return {
+            group,
+            expirationDate: data.creationDate.getTime() + timeToMs(timeframe)
+          };
+        } else {
+          return null;
+        }
+      }
+    }
+
+    return null;
   }
 
   async use(
@@ -258,90 +342,111 @@ export default class Cooldown {
     ) => Promise<void>
   > {
     return async (req, res, next) => {
-      if (!routeFile.cooldown.enabled || !req.account) {
+      if (!routeFile.cooldown.enabled) {
         return next();
       }
 
-      const cooldown: {
-        triggered: boolean;
-        expirationDate: number;
-        groupName: CooldownGroups;
-      } = {
-        triggered: false,
-        expirationDate: 0,
-        groupName: null as unknown as CooldownGroups
-      };
+      const cooldowns: {
+        method: CooldownMethods;
+        value: string | number;
+        group: CooldownGroups;
+        timeframe: number | string;
+        requests: number;
+        enabled: boolean;
+        use: boolean;
+      }[] = [];
 
-      // TODO Maybe map the groups and run them in parallel
-      for (const group of routeFile.cooldown.groups) {
-        const config = this.#api.mode.config.cooldownGroups[group.name];
-        let data = await this.get(req.account.id, group.name);
-        let hasReseted = false;
+      for (const group of routeFile.cooldown.ip) {
+        const config = this.#api.mode.config.cooldownGroups[group.name].ip;
 
-        if (data) {
-          const [reset, reseted] = await this.reset(
-            req.account.id,
-            group.name,
-            config,
-            data
-          );
-          if (reset instanceof Error) {
-            return next(reset);
-          }
+        cooldowns.push({
+          method: "ip",
+          value: req.ip as string,
+          group: group.name,
+          timeframe: config.timeframe,
+          requests: config.requests,
+          enabled: config.enabled,
+          use: group.use
+        });
+      }
 
-          data = reset;
-          hasReseted = reseted;
-        }
+      if (req.account) {
+        for (const group of routeFile.cooldown.account) {
+          const config =
+            this.#api.mode.config.cooldownGroups[group.name].account;
 
-        if (group.use) {
-          if (data) {
-            if (data.requests >= config.requests) {
-              const lifespan =
-                data.creationDate.getTime() + timeToMs(config.timeframe);
-              cooldown.triggered = true;
-              if (lifespan > cooldown.expirationDate) {
-                cooldown.expirationDate = lifespan;
-                cooldown.groupName = data.group;
-              }
-            } else {
-              if (!hasReseted) {
-                const update = await this.update(
-                  group.add,
-                  req.account.id,
-                  group.name,
-                  data
-                );
-                if (update instanceof Error) {
-                  return next(update);
-                }
-              }
-            }
-          } else {
-            const set = await this.set(
-              false,
-              false,
-              req.account.id,
-              group.name,
-              1,
-              Date.now()
-            );
-            if (set instanceof Error) {
-              return next(set);
-            }
-          }
+          cooldowns.push({
+            method: "account",
+            value: req.account.id,
+            group: group.name,
+            timeframe: config.timeframe,
+            requests: config.requests,
+            enabled: config.enabled,
+            use: group.use
+          });
         }
       }
 
-      if (cooldown.triggered) {
+      const mapRun = cooldowns.map(async (cooldown) => {
+        const run = await this.run(
+          cooldown.method,
+          cooldown.value,
+          cooldown.group,
+          cooldown.timeframe,
+          cooldown.requests,
+          cooldown.enabled,
+          cooldown.use
+        );
+        if (run instanceof Error) {
+          throw run;
+        }
+
+        return run;
+      });
+
+      const run = await Promise.all(mapRun);
+
+      const findErrors = run.filter(
+        (x) => x instanceof Error
+      ) as unknown as Error[];
+      if (findErrors.length) {
+        // TODO Maybe stack the errors and show all.
+        return next(findErrors[0]);
+      }
+
+      const triggered = run.filter(
+        (x) => typeof x === "object" && x !== null
+      ) as unknown as { group: CooldownGroups; expirationDate: number }[];
+      if (triggered.length) {
+        const longestTime = triggered.reduce((max, x) => {
+          return x.expirationDate > max ? x.expirationDate : max;
+        }, triggered[0].expirationDate);
+
         return sar(res, 429, {
           code: 230005,
           messageId: "cooldown",
           message: "Too many requests.",
           content: {
-            expirationDate: cooldown.expirationDate
+            expirationDate: longestTime
           }
         });
       }
+
+      const setupUpdater = await this.updater(
+        cooldowns
+          .filter((cooldown) => cooldown.enabled)
+          .map((cooldown) => {
+            return {
+              method: cooldown.method,
+              value: cooldown.value,
+              group: cooldown.group
+            };
+          })
+      );
+
+      req.cooldown = {
+        update: setupUpdater.run
+      };
 
       return next();
     };
