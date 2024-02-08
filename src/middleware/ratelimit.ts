@@ -7,7 +7,7 @@ import API from "../api/index.js";
 import { Route } from "../routes/index_.js";
 import { RatelimitData, RatelimitMethods } from "../types.js";
 
-// TODO Handle errors and prevent the app from crashing or at least from showing the logs
+// TODO Handle errors and prevent the app from crashing or at least from showing the logs to the user.
 
 export default class Ratelimit {
   readonly #api: API;
@@ -92,6 +92,7 @@ export default class Ratelimit {
     group: string,
     timeframe: number | string,
     requests: number,
+    enabled: boolean,
     use: boolean,
     add: boolean
   ): Promise<
@@ -102,6 +103,10 @@ export default class Ratelimit {
     | null
     | Error
   > {
+    if (!enabled) {
+      return null;
+    }
+
     const get = await this.get(method, value, group);
 
     if (get) {
@@ -145,6 +150,7 @@ export default class Ratelimit {
         group: string;
         timeframe: number | string;
         requests: number;
+        enabled: boolean;
         use: boolean;
         add: boolean;
       }[] = [];
@@ -156,6 +162,7 @@ export default class Ratelimit {
           group: req.path,
           timeframe: routeFile.ratelimit.ip.local.timeframe,
           requests: routeFile.ratelimit.ip.local.requests,
+          enabled: true,
           use: true,
           add: true
         });
@@ -170,6 +177,7 @@ export default class Ratelimit {
           group: group.name,
           timeframe: config.ip.timeframe,
           requests: config.ip.requests,
+          enabled: config.ip.enabled,
           use: group.use,
           add: group.add
         });
@@ -183,6 +191,7 @@ export default class Ratelimit {
             group: req.path,
             timeframe: routeFile.ratelimit.account.local.timeframe,
             requests: routeFile.ratelimit.account.local.requests,
+            enabled: true,
             use: true,
             add: true
           });
@@ -197,6 +206,7 @@ export default class Ratelimit {
             group: group.name,
             timeframe: config.account.timeframe,
             requests: config.account.requests,
+            enabled: config.account.enabled,
             use: group.use,
             add: group.add
           });
@@ -210,6 +220,7 @@ export default class Ratelimit {
           ratelimit.group,
           ratelimit.timeframe,
           ratelimit.requests,
+          ratelimit.enabled,
           ratelimit.use,
           ratelimit.add
         );
