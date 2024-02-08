@@ -6,9 +6,9 @@ import express from "express";
 import API from "../api/index.js";
 import { Route } from "../routes/index_.js";
 import type {
-  ConfigCooldownGroup,
   CooldownData,
-  CooldownGroups
+  CooldownGroups,
+  CooldownMethods
 } from "../types.js";
 
 export default class Cooldown {
@@ -18,19 +18,38 @@ export default class Cooldown {
     this.#api = api;
   }
 
+  // TODO Make a function to scan an object and convert the Date entries to number and viceversa.
+
+  private convertMethodToKey(
+    method: CooldownMethods
+  ): "ip_address" | "account_id" {
+    switch (method) {
+      case "ip": {
+        return "ip_address";
+      }
+      case "account": {
+        return "account_id";
+      }
+    }
+  }
+
   private async get(
-    accountId: number,
+    method: CooldownMethods,
+    value: string | number,
     group: CooldownGroups
   ): Promise<CooldownData | null> {
+    const methodKey = this.convertMethodToKey(method);
+
     const fromKeystore = async (): Promise<CooldownData | null> => {
-      const key = `cache:cooldown:${accountId}:${group}`;
+      const key = `cache:cooldown:${method}:${value}:${group}`;
       const query = await this.#api.keystore.client.get(key);
 
       if (query) {
         const rawData = jsonStrToObj(query) as unknown as any;
         if (rawData) {
           const data: CooldownData = {
-            accountId: rawData.account_id,
+            method,
+            value: rawData[methodKey],
             group: rawData.group_name,
             requests: rawData.requests,
             creationDate: new Date(rawData.creation_date)
@@ -45,13 +64,14 @@ export default class Cooldown {
 
     const fromDatabase = async (): Promise<CooldownData | null> => {
       const query = await this.#api.database.client.query(
-        `SELECT * FROM account_cooldown WHERE account_id = $1 AND group_name = $2`,
-        [accountId, group]
+        `SELECT * FROM ${method}_cooldown WHERE ${methodKey} = $1 AND group_name = $2`,
+        [value, group]
       );
 
       if (query.rows.length === 1) {
         const data: CooldownData = {
-          accountId: query.rows[0].account_id,
+          method,
+          value: query.rows[0][methodKey],
           group: query.rows[0].group_name,
           requests: query.rows[0].requests,
           creationDate: query.rows[0].creation_date
@@ -79,26 +99,35 @@ export default class Cooldown {
   private async set(
     isUpdate: boolean,
     updateCreationDate: boolean,
-    accountId: number,
+    method: CooldownMethods,
+    value: string | number,
     group: CooldownGroups,
     requests: number,
     creationDate: number
   ): Promise<CooldownData | Error> {
-    const data = {
-      account_id: accountId,
+    const methodKey = this.convertMethodToKey(method);
+
+    let data: any = {};
+    data[methodKey] = value;
+    data = {
+      ...data,
       group_name: group,
       requests,
       creation_date: new Date(creationDate)
     };
 
     const keystore = async (): Promise<void | Error> => {
-      const key = `cache:cooldown:${accountId}:${group}`;
-      const modifiedData = {
-        account_id: accountId,
+      const key = `cache:cooldown:${method}:${value}:${group}`;
+
+      let modifiedData: any = {};
+      modifiedData[methodKey] = value;
+      modifiedData = {
+        ...modifiedData,
         group_name: group,
         requests,
         creation_date: creationDate
       };
+
       const query = await this.#api.keystore.client.setex(
         key,
         this.#api.mode.config.cooldownCacheLifespan,
@@ -112,17 +141,18 @@ export default class Cooldown {
 
     const database = async (): Promise<void> => {
       if (isUpdate) {
-        const values: [number, number, CooldownGroups, Date?] = [
+        const values: [number, string | number, CooldownGroups, Date?] = [
           requests,
-          accountId,
+          value,
           group
         ];
         if (updateCreationDate) {
           values.push(new Date(creationDate));
         }
-        this.#api.database.client.query(
+
+        await this.#api.database.client.query(
           `
-          UPDATE account_cooldown
+          UPDATE ${method}_cooldown
           SET
             requests = $1${
               updateCreationDate
@@ -131,16 +161,16 @@ export default class Cooldown {
                 : ""
             }
           WHERE
-            account_id = $2 AND
+            ${methodKey} = $2 AND
             group_name = $3
           `,
           values
         );
       } else {
-        this.#api.database.client.query(
+        await this.#api.database.client.query(
           `
-          INSERT INTO account_cooldown (
-            account_id,
+          INSERT INTO ${method}_cooldown (
+            ${methodKey},
             group_name,
             requests,
             creation_date
@@ -148,7 +178,7 @@ export default class Cooldown {
             $1, $2, $3, $4
           )
           `,
-          [accountId, group, requests, new Date()]
+          [value, group, requests, new Date()]
         );
       }
     };
@@ -161,23 +191,16 @@ export default class Cooldown {
     database();
 
     const cooldownData: CooldownData = {
-      accountId: data.account_id,
-      group: data.group_name,
-      requests: data.requests,
-      creationDate: data.creation_date
+      method,
+      value,
+      group,
+      requests,
+      creationDate: new Date(creationDate)
     };
 
     return cooldownData;
   }
 
-  private async update(
-    add: boolean,
-    accountId: number,
-    groupName: CooldownGroups,
-    data: CooldownData | null
-  ): Promise<CooldownData | Error> {
-    if (data) {
-      if (!add) return data;
 
       const set = await this.set(
         true,
