@@ -3,6 +3,7 @@
 
 import { Logger, stopwatch } from "commonlib-js";
 import config from "../config.js";
+import Account from "../controllers/account.js";
 import Database from "../database/index.js";
 import Keystore from "../keystore/index.js";
 import Cooldown from "../middleware/cooldown.js";
@@ -28,6 +29,7 @@ export default class API {
   readonly server: Server;
   readonly ratelimit: Ratelimit;
   readonly cooldown: Cooldown;
+  readonly account: Account;
 
   constructor() {
     const useStopwatch = stopwatch();
@@ -54,6 +56,7 @@ export default class API {
     this.server = new Server(this);
     this.ratelimit = new Ratelimit(this);
     this.cooldown = new Cooldown(this);
+    this.account = new Account(this);
 
     this.logger.log("info", "Initialized.", {
       category: "api",
