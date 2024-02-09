@@ -66,3 +66,23 @@ export const KEYSTORE_PASSWORD = "";
  * 0
  */
 export const KEYSTORE_DATABASE = -1;
+/**
+ * @example
+ * "mail.example.com"
+ */
+export const EMAIL_HOST = "";
+/**
+ * @example
+ * 465
+ */
+export const EMAIL_PORT = -1;
+/**
+ * @example
+ * "hello@example.com"
+ */
+export const EMAIL_ACCOUNT_X_USERNAME = "";
+/**
+ * @example
+ * "nYzEp_UPL,J@YXyE:x>^X-%GMs3X!!o)kp6AJ]1v@0q*oMY*^dxe9}hMkn?WyTvrFM9QeaRxfPNT=!44giy:UQ)B}^Ma:1@su>3r"
+ */
+export const EMAIL_ACCOUNT_X_PASSWORD = "";
