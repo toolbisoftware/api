@@ -41,9 +41,8 @@ export interface ConfigRatelimitGroup {
 }
 
 export interface ConfigCooldownGroup {
-  enabled: boolean;
-  timeframe: number | string;
-  requests: number;
+  ip: { enabled: boolean; timeframe: number | string; requests: number };
+  account: { enabled: boolean; timeframe: number | string; requests: number };
 }
 
 export interface ConfigMode {
@@ -129,12 +128,12 @@ export interface RouteOptionsRatelimit {
 export interface RouteCooldownGroup {
   name: CooldownGroups;
   use: boolean;
-  add: boolean;
 }
 
 export interface RouteOptionsCooldown {
   enabled: boolean;
-  groups: RouteCooldownGroup[];
+  ip: RouteCooldownGroup[];
+  account: RouteCooldownGroup[];
 }
 
 export interface RouteOptions {
@@ -159,10 +158,13 @@ export interface RatelimitData {
   expirationDate: number;
 }
 
+export type CooldownMethods = "ip" | "account";
+
 export type CooldownGroups = "test";
 
 export interface CooldownData {
-  accountId: number;
+  method: CooldownMethods;
+  value: string | number;
   group: CooldownGroups;
   requests: number;
   creationDate: Date;
@@ -181,5 +183,13 @@ export interface Account {
 declare module "express-serve-static-core" {
   interface Request {
     account?: Account;
+    cooldown: {
+      update: (
+        entries: {
+          method: CooldownMethods;
+          group: CooldownGroups;
+        }[]
+      ) => Promise<void>;
+    };
   }
 }
