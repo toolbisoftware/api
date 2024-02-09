@@ -19,6 +19,15 @@ const development: ConfigMode = {
   keystoreUser: developmentSecrets.KEYSTORE_USER || "default",
   keystorePassword: developmentSecrets.KEYSTORE_PASSWORD,
   keystoreDatabase: developmentSecrets.KEYSTORE_DATABASE,
+  emailHost: developmentSecrets.EMAIL_HOST,
+  emailPort: developmentSecrets.EMAIL_PORT,
+  emailAccounts: {
+    toolbi_account: {
+      name: "Toolbi Account (Test)",
+      username: developmentSecrets.EMAIL_ACCOUNT_TOOLBI_ACCOUNT_USERNAME,
+      password: developmentSecrets.EMAIL_ACCOUNT_TOOLBI_ACCOUNT_PASSWORD
+    }
+  },
   ratelimitGroups: {
     global: {
       ip: {
@@ -57,6 +66,15 @@ const production: ConfigMode = {
   keystoreUser: productionSecrets.KEYSTORE_USER || "default",
   keystorePassword: productionSecrets.KEYSTORE_PASSWORD,
   keystoreDatabase: productionSecrets.KEYSTORE_DATABASE,
+  emailHost: productionSecrets.EMAIL_HOST,
+  emailPort: productionSecrets.EMAIL_PORT,
+  emailAccounts: {
+    toolbi_account: {
+      name: "Toolbi Account",
+      username: productionSecrets.EMAIL_ACCOUNT_TOOLBI_ACCOUNT_USERNAME,
+      password: productionSecrets.EMAIL_ACCOUNT_TOOLBI_ACCOUNT_PASSWORD
+    }
+  },
   ratelimitGroups: {
     global: {
       ip: {
