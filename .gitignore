@@ -2,13 +2,7 @@
 # Check the README file in the project root for more information.
 
 # File Extensions
-*.env
 
 # Folders
-/build
-/logs
-/node_modules
 
 # Files
-/src/secrets/*
-!*.template.ts

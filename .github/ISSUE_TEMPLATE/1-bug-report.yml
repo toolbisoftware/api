@@ -16,7 +16,7 @@ body:
   - type: input
     attributes:
       label: What version of **API** is running?
-      description: The version can be found in the `package.json` file.
+      description: The version can be found in the `Cargo.toml` file.
   - type: input
     attributes:
       label: What platform is running?
