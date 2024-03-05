@@ -15,7 +15,7 @@ body:
         Please try to include as much information as possible.
   - type: input
     attributes:
-      label: What version of **API** is running?
+      label: What version of API is running?
       description: The version can be found in the `Cargo.toml` file.
   - type: input
     attributes:
